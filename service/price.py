@@ -206,8 +206,35 @@ class Price:
         # Prices older than 2 hours have to be refetched
         validityOverride = 2 * 60 * 60
         self.getPrices(itemsToFetch, makeCheapMapCb, fetchTimeout=fetchTimeout, validityOverride=validityOverride)
+    
+    def findCheapestReplacements(self, items, callback, fetchTimeout=10):
+        sMkt = Market.getInstance()
+        
+        replacementsAll = {}
+        for item in items:
+            if item in replacementsAll:
+                continue
+            itemRepls = sMkt.getVariationsByItems([item])
+            if itemRepls:
+                replacementsAll[item] = itemRepls
+        itemsToFetch = {i for i in chain(replacementsAll.keys(), *replacementsAll.values())}
+        
+        def makeCheapMapCb(requests):
+            # Decide what we are going to replace
+            replacementsCheapest = {}  # Items which should be replaced
+            for replacee, replacers in replacementsAll.items():
+                replacer = min(replacers, key=lambda i: i.price.price or math.inf)
+                if (replacer.price.price or math.inf) < (replacee.price.price or math.inf):
+                    replacementsCheapest[replacee] = replacer
+            try:
+                callback(replacementsCheapest)
+            except Exception as e:
+                pyfalog.critical("Execution of callback from findCheapestReplacements failed.")
+                pyfalog.critical(e)
 
-
+        # Prices older than 2 hours have to be refetched
+        validityOverride = 2 * 60 * 60
+        self.getPrices(itemsToFetch, makeCheapMapCb, fetchTimeout=fetchTimeout, validityOverride=validityOverride)
 
 
 class PriceWorkerThread(threading.Thread):

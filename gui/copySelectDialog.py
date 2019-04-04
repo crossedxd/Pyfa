@@ -134,6 +134,8 @@ class CopySelectDialog(wx.Dialog):
         export_options = options.get(selected)
         if selected == CopySelectDialog.copyFormatMultiBuy and export_options.get(PortMultiBuyOptions.OPTIMIZE_PRICES, False):
             self.waitDialog = wx.BusyInfo("Optimizing Prices", parent=self)
+        elif selected == CopySelectDialog.copyFormatMultiBuy and export_options.get(PortMultiBuyOptions.CHEAPEN_PRICES, False):
+            self.waitDialog = wx.BusyInfo("Cheapening Prices", parent=self)
 
         self.CopySelectDict[selected](export_options, callback=cb)
 
@@ -174,7 +176,7 @@ class CopySelectDialog(wx.Dialog):
 
     def exportXml(self, options, callback):
         fit = getFit(self.mainFrame.getActiveFit())
-        Port.exportXml([fit], None, callback)
+        Port.exportXml(None, fit, callback)
 
     def exportMultiBuy(self, options, callback):
         fit = getFit(self.mainFrame.getActiveFit())

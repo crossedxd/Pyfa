@@ -27,6 +27,7 @@ MULTIBUY_OPTIONS = (
     (PortMultiBuyOptions.IMPLANTS, 'Implants && Boosters', 'Export implants and boosters', False),
     (PortMultiBuyOptions.CARGO, 'Cargo', 'Export cargo contents', True),
     (PortMultiBuyOptions.OPTIMIZE_PRICES, 'Optimize Prices', 'Replace items by cheaper alternatives', False),
+    (PortMultiBuyOptions.CHEAPEN_PRICES, 'Cheapen Prices', 'Replace items by cheapest alternatives', False),
 )
 
 
@@ -70,6 +71,19 @@ def exportMultiBuy(fit, options, callback):
 
         priceSvc = sPrc.getInstance()
         priceSvc.findCheaperReplacements(itemAmounts, formatCheaperExportCb)
+    
+    if options[PortMultiBuyOptions.CHEAPEN_PRICES]:
+
+        def formatCheapestExportCb(replacementsCheapest):
+            updatedAmounts = {}
+            for item, itemAmount in itemAmounts.items():
+                _addItem(updatedAmounts, replacementsCheapest.get(item, item), itemAmount)
+            string = _prepareString(fit.ship.item, updatedAmounts)
+            callback(string)
+
+        priceSvc = sPrc.getInstance()
+        priceSvc.findCheapestReplacements(itemAmounts, formatCheapestExportCb)
+    
     else:
         string = _prepareString(fit.ship.item, itemAmounts)
         if callback:

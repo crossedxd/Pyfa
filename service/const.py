@@ -57,6 +57,7 @@ class PortMultiBuyOptions(IntEnum):
     CARGO = 2
     LOADED_CHARGES = 3
     OPTIMIZE_PRICES = 4
+    CHEAPEN_PRICES = 5
 
 
 @unique

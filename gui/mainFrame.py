@@ -418,7 +418,7 @@ class MainFrame(wx.Frame):
             format_ = dlg.GetFilterIndex()
             path = dlg.GetPath()
             if format_ == 0:
-                output = Port.exportXml([fit], None)
+                output = Port.exportXml(None, fit)
                 if '.' not in os.path.basename(path):
                     path += ".xml"
             else:
@@ -511,6 +511,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.revertChar, id=menuBar.revertCharId)
         # Optimize fit price
         self.Bind(wx.EVT_MENU, self.optimizeFitPrice, id=menuBar.optimizeFitPrice)
+        # Cheapen fit price
+        self.Bind(wx.EVT_MENU, self.cheapenFitPrice, id=menuBar.cheapenFitPrice)
 
         # Browse fittings
         self.Bind(wx.EVT_MENU, self.eveFittings, id=menuBar.eveFittingsId)
@@ -674,6 +676,24 @@ class MainFrame(wx.Frame):
             self.disablerAll = wx.WindowDisabler()
             self.waitDialog = wx.BusyInfo("Please Wait...", parent=self)
             Price.getInstance().findCheaperReplacements(fitItems, updateFitCb, fetchTimeout=10)
+    
+    def cheapenFitPrice(self, event):
+        fitID = self.getActiveFit()
+        sFit = Fit.getInstance()
+        fit = sFit.getFit(fitID)
+
+        if fit:
+            def updateFitCb(replacementsCheapest):
+                del self.waitDialog
+                del self.disablerAll
+                rebaseMap = {k.ID: v.ID for k, v in replacementsCheapest.items()}
+                self.command.Submit(cmd.GuiRebaseItemsCommand(fitID, rebaseMap))
+
+            fitItems = {i for i in Fit.fitItemIter(fit) if i is not fit.ship.item}
+            self.disablerAll = wx.WindowDisabler()
+            self.waitDialog = wx.BusyInfo("Please Wait...", parent=self)
+            Price.getInstance().findCheapestReplacements(fitItems, updateFitCb, fetchTimeout=10)
+        
 
     def AdditionsTabSelect(self, event):
         selTab = self.additionsSelect.index(event.GetId())

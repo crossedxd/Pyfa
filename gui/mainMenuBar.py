@@ -58,6 +58,7 @@ class MainMenuBar(wx.MenuBar):
         self.toggleIgnoreRestrictionID = wx.NewId()
         self.devToolsId = wx.NewId()
         self.optimizeFitPrice = wx.NewId()
+        self.cheapenFitPrice = wx.NewId()
 
         # pheonix: evaluate if this is needed
         if 'wxMac' in wx.PlatformInfo and wx.VERSION >= (3, 0):
@@ -102,6 +103,7 @@ class MainMenuBar(wx.MenuBar):
         self.ignoreRestrictionItem = editMenu.Append(self.toggleIgnoreRestrictionID, "Ignore Fitting Restrictions")
         editMenu.AppendSeparator()
         editMenu.Append(self.optimizeFitPrice, "Optimize Fit Price")
+        editMenu.Append(self.cheapenFitPrice, "Cheapen Fit Price")
 
 
         # Character menu
